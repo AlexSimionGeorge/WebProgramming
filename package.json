@@ -1,0 +1,19 @@
+{
+  "name": "web-programming-laboratory",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "backend",
+    "apps/admin",
+    "apps/player"
+  ],
+  "scripts": {
+    "db:up": "npm run db:up --workspace backend",
+    "db:migrate": "npm run db:migrate --workspace backend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:admin": "npm run dev --workspace apps/admin",
+    "dev:player": "npm run dev --workspace apps/player",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
