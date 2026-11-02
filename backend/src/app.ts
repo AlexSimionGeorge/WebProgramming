@@ -1,5 +1,7 @@
 import cors from "cors";
 import express from "express";
+import { errorHandler, unknownRouteHandler } from "./http/errors.js";
+import { authRouter } from "./modules/auth/routes.js";
 
 const localhostOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
@@ -12,6 +14,10 @@ export function createApp() {
   app.get("/api/health", (_request, response) => {
     response.json({ status: "ok" });
   });
+  app.use("/api/auth", authRouter);
+
+  app.use(unknownRouteHandler);
+  app.use(errorHandler);
 
   return app;
 }
