@@ -13,11 +13,12 @@ import {
 } from "../centers/repository.js";
 import { loadCenterDetails } from "../centers/service.js";
 import type { CenterConfiguration, CenterDetails } from "../centers/types.js";
+import { listActiveCenterBookingsOnDate, type AdminBooking } from "./repository.js";
 
 const centerNotConfigured = () =>
   new HttpError(404, "CENTER_NOT_CONFIGURED", "Set up your centre before using this page");
 
-export async function findOwnCenterId(ownerAccountId: string): Promise<string> {
+async function findOwnCenterId(ownerAccountId: string): Promise<string> {
   const centerId = await findCenterIdByOwner(pool, ownerAccountId);
   if (!centerId) {
     throw centerNotConfigured();
@@ -68,4 +69,9 @@ export async function configureOwnCenter(
     await replaceOpeningIntervals(client, centerId, configuration.openingIntervals);
     return (await loadCenterDetails(client, centerId))!;
   });
+}
+
+export async function listOwnCenterBookings(ownerAccountId: string, date: string): Promise<AdminBooking[]> {
+  const centerId = await findOwnCenterId(ownerAccountId);
+  return listActiveCenterBookingsOnDate(pool, centerId, date);
 }

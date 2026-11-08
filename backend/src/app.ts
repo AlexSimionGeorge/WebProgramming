@@ -3,6 +3,7 @@ import express from "express";
 import { errorHandler, unknownRouteHandler } from "./http/errors.js";
 import { adminRouter } from "./modules/admin/routes.js";
 import { authRouter } from "./modules/auth/routes.js";
+import { bookingsRouter } from "./modules/bookings/routes.js";
 import { centersRouter } from "./modules/centers/routes.js";
 
 const localhostOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
@@ -19,6 +20,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);
   app.use("/api/centers", centersRouter);
+  app.use("/api/bookings", bookingsRouter);
 
   app.use(unknownRouteHandler);
   app.use(errorHandler);
