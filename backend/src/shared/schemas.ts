@@ -13,3 +13,9 @@ export const wallClockTimeSchema = z
 export const closingTimeSchema = z.union([wallClockTimeSchema, z.literal("24:00")]);
 
 export const dateQuerySchema = z.object({ date: calendarDateSchema });
+
+export const identifierSchema = z.uuid();
+
+export function isIdentifier(value: string): boolean {
+  return identifierSchema.safeParse(value).success;
+}
