@@ -122,6 +122,20 @@ type DayAvailability = {
 }
 ```
 
+| GET | `/api/availability?date=YYYY-MM-DD` | `CityAvailability` — every centre's day at once, for the Reserve screen |
+
+```ts
+type CityAvailability = {
+  date: string
+  centers: {
+    center: CenterSummary
+    slotMinutes: number
+    courts: { id: string; name: string }[]
+    slots: { startsAt: string; endsAt: string; freeCourtIds: string[] }[]   // same rules as DayAvailability
+  }[]                                                                      // sorted by centre name; closed centres included with slots: []
+}
+```
+
 Slots are generated per opening interval of that weekday: from `opensAt`, step `slotMinutes`, while the
 slot still ends at or before `closesAt`. Slots that already started today are omitted. A closed day returns `slots: []`.
 
