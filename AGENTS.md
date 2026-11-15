@@ -158,3 +158,71 @@ type PlayerBooking = {
 A booking must match a generated slot exactly (`400 NOT_A_SLOT`), may not be in the past (`400 SLOT_IN_PAST`)
 and may not overlap another active booking on that court (`409 SLOT_TAKEN` — enforced by a database
 exclusion constraint, not only in code).
+
+### People and friends (any signed-in `player`)
+
+Players find each other by display name or exact email. **An email never comes back to anyone but its owner.**
+
+```ts
+type Person = { id: string; displayName: string }
+
+type Friendship = {
+  id: string
+  person: Person                                  // always the other side
+  status: 'pending' | 'accepted'
+  direction: 'incoming' | 'outgoing'              // who asked; kept after acceptance
+}
+```
+
+| Method | Path | Body | Response |
+|---|---|---|---|
+| GET | `/api/people?query=` | — | `200 PersonSearchResult[]` — `Person & { friendship: Friendship \| null }`; players only, never yourself; `query` ≥ 2 chars matches anywhere in the display name (case-insensitive) or a whole email; at most 20 |
+| GET | `/api/friends` | — | `200 Friendship[]` — accepted and pending, both directions |
+| POST | `/api/friends` | `{ personId }` | `201 Friendship` — a request; if they had already asked you it is accepted instead (`200`). `409 ALREADY_FRIENDS`, `409 REQUEST_PENDING`, `400 CANNOT_FRIEND_YOURSELF` |
+| POST | `/api/friends/:friendshipId/accept` | — | `200 Friendship` (incoming pending only) |
+| DELETE | `/api/friends/:friendshipId` | — | `204` — declines, withdraws or unfriends |
+
+### Games (any signed-in `player`)
+
+**Every booking is a game.** Booking creates it with the booker in seat 1 as host; cancelling the booking
+cancels the game, and a cancelled game is no longer listed or readable. Seats 1 + 2 are team A, 3 + 4 team B.
+
+```ts
+type GameSeat = {
+  index: 1 | 2 | 3 | 4
+  status: 'empty' | 'invited' | 'filled'
+  person: Person | null
+}
+
+type GameSet = { index: number; teamA: number; teamB: number }   // index 1..5, games 0..15, nothing else validated
+
+type Game = {
+  id: string
+  bookingId: string
+  date: string; startsAt: string; endsAt: string
+  center: { id: string; name: string; address: string; city: string }
+  court: { id: string; name: string }
+  host: Person
+  seats: GameSeat[]                 // always four, ordered by index
+  sets: GameSet[]                   // ordered by index, contiguous from 1
+  setsWon: { teamA: number; teamB: number }   // derived on read: a drawn set counts for nobody, and the last set
+                                              // counts only once the game is finished
+  finishedAt: string | null
+  viewer: { isHost: boolean; seatIndex: number | null; isInvited: boolean; canScore: boolean }
+}
+```
+
+| Method | Path | Body | Response |
+|---|---|---|---|
+| GET | `/api/games/mine` | — | `200 Game[]` — hosting, seated or invited; upcoming first (soonest), then past (newest) |
+| GET | `/api/games/:gameId` | — | `200 Game` — only for the host, a seated player or an invitee; otherwise `404 GAME_NOT_FOUND` |
+| POST | `/api/games/:gameId/invitations` | `{ personId }` | `200 Game` — host only; the person must be an accepted friend (`403 NOT_A_FRIEND`); takes the lowest empty seat (`409 GAME_FULL`, `409 ALREADY_IN_GAME`) |
+| POST | `/api/games/:gameId/invitation/accept` | — | `200 Game` — the invitee's seat becomes `filled` |
+| POST | `/api/games/:gameId/invitation/decline` | — | `200 Game` — the seat becomes `empty` |
+| DELETE | `/api/games/:gameId/seats/:seatIndex` | — | `200 Game` — the host withdraws an invitation or removes a player (never their own seat: `400 HOST_CANNOT_LEAVE`); a seated player may free their own seat (leave) |
+| PUT | `/api/games/:gameId/sets/:setIndex` | `{ teamA, teamB }` | `200 Game` — upsert; `canScore` required (host or a filled seat, `403`); index may be at most `sets.length + 1` (`400 SET_OUT_OF_RANGE`) |
+| DELETE | `/api/games/:gameId/sets/:setIndex` | — | `200 Game` — the higher sets move down one |
+| POST | `/api/games/:gameId/finish` | — | `200 Game` — sets `finishedAt`; gates nothing |
+| POST | `/api/games/:gameId/reopen` | — | `200 Game` — clears `finishedAt` |
+
+`PlayerBooking` gains `gameId: string`. `AdminBooking` gains `players: Person[]` — the filled seats, host first.
