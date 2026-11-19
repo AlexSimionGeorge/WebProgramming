@@ -1,4 +1,5 @@
-import { pool } from "../../db/pool.js";
+import type { PoolClient } from "pg";
+import { pool, withTransaction } from "../../db/pool.js";
 import { isExclusionViolation } from "../../db/errors.js";
 import { HttpError } from "../../http/errors.js";
 import { currentCenterTime, hasStarted } from "../../shared/clock.js";
@@ -6,6 +7,7 @@ import { isIdentifier } from "../../shared/schemas.js";
 import { isoWeekday } from "../../shared/wallClock.js";
 import { listOpeningHoursOnWeekday } from "../availability/repository.js";
 import { generateSlots, type TimeRange } from "../availability/slots.js";
+import { insertGameWithHostSeated } from "../games/repository.js";
 import {
   findActiveBooking,
   findBookableCourt,
@@ -38,9 +40,9 @@ async function requireMatchingSlot(court: BookableCourt, request: BookingRequest
   return slot;
 }
 
-async function insertBookingOrRefuseOverlap(booking: NewBooking): Promise<string> {
+async function insertBookingOrRefuseOverlap(client: PoolClient, booking: NewBooking): Promise<string> {
   try {
-    return await insertBooking(pool, booking);
+    return await insertBooking(client, booking);
   } catch (error) {
     if (isExclusionViolation(error)) {
       throw new HttpError(409, "SLOT_TAKEN", "Someone already booked this court at this time");
@@ -55,13 +57,16 @@ export async function bookCourt(playerAccountId: string, request: BookingRequest
   if (hasStarted(request.date, slot.startsAt, currentCenterTime())) {
     throw new HttpError(400, "SLOT_IN_PAST", "This slot has already started");
   }
-  const bookingId = await insertBookingOrRefuseOverlap({
-    courtId: court.courtId,
-    playerAccountId,
-    date: request.date,
-    ...slot,
+  return withTransaction(async (client) => {
+    const bookingId = await insertBookingOrRefuseOverlap(client, {
+      courtId: court.courtId,
+      playerAccountId,
+      date: request.date,
+      ...slot,
+    });
+    await insertGameWithHostSeated(client, bookingId, playerAccountId);
+    return (await findPlayerBooking(client, bookingId))!;
   });
-  return (await findPlayerBooking(pool, bookingId))!;
 }
 
 export async function listOwnBookings(playerAccountId: string): Promise<PlayerBooking[]> {

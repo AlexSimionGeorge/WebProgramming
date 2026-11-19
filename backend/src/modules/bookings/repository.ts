@@ -7,6 +7,7 @@ export type PlayerBooking = {
   endsAt: string;
   court: { id: string; name: string };
   center: { id: string; name: string; address: string; city: string };
+  gameId: string;
 };
 
 export type BookableCourt = { courtId: string; centerId: string; slotMinutes: number };
@@ -28,10 +29,12 @@ const playerBookingSelect = `
          to_char(bookings.ends_at, 'HH24:MI') AS "endsAt",
          json_build_object('id', courts.id, 'name', courts.name) AS "court",
          json_build_object('id', centers.id, 'name', centers.name,
-                           'address', centers.address, 'city', centers.city) AS "center"
+                           'address', centers.address, 'city', centers.city) AS "center",
+         games.id AS "gameId"
     FROM bookings
     JOIN courts ON courts.id = bookings.court_id
-    JOIN centers ON centers.id = courts.center_id`;
+    JOIN centers ON centers.id = courts.center_id
+    JOIN games ON games.booking_id = bookings.id`;
 
 export async function findBookableCourt(db: Queryable, courtId: string): Promise<BookableCourt | undefined> {
   const result = await db.query<BookableCourt>(
