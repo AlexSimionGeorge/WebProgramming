@@ -7,6 +7,7 @@ import { cityAvailabilityRouter } from "./modules/availability/routes.js";
 import { bookingsRouter } from "./modules/bookings/routes.js";
 import { centersRouter } from "./modules/centers/routes.js";
 import { friendsRouter } from "./modules/friends/routes.js";
+import { gamesRouter } from "./modules/games/routes.js";
 import { peopleRouter } from "./modules/people/routes.js";
 
 const localhostOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
@@ -27,6 +28,7 @@ export function createApp() {
   app.use("/api/bookings", bookingsRouter);
   app.use("/api/people", peopleRouter);
   app.use("/api/friends", friendsRouter);
+  app.use("/api/games", gamesRouter);
 
   app.use(unknownRouteHandler);
   app.use(errorHandler);
