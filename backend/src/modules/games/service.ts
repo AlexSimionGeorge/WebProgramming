@@ -6,6 +6,7 @@ import { isIdentifier } from "../../shared/schemas.js";
 import { areFriends } from "../friends/repository.js";
 import { assembleGame, isVisibleToViewer, type Game } from "./assembly.js";
 import {
+  deleteSetAndMoveHigherSetsDown,
   emptySeat,
   fillSeat,
   findGameSummary,
@@ -14,12 +15,18 @@ import {
   listSeatsOfGames,
   listSetsOfGames,
   lockGameSummary,
+  markGameFinished,
+  markGameReopened,
+  upsertSet,
   type GameSeat,
   type GameSummary,
 } from "./repository.js";
+import type { SetScore } from "./schemas.js";
 
 type SummaryLookup = (db: Queryable, gameId: string) => Promise<GameSummary | undefined>;
 type GameChange = (client: PoolClient, game: Game) => Promise<void>;
+
+const maximumSetCount = 5;
 
 const gameNotFound = () => new HttpError(404, "GAME_NOT_FOUND", "You have no such game");
 
@@ -97,6 +104,24 @@ function requireSeatTheViewerMayFree(game: Game, viewerAccountId: string, seatIn
   return seat;
 }
 
+function requireScorer(game: Game) {
+  if (!game.viewer.canScore) {
+    throw new HttpError(403, "CANNOT_SCORE", "Only the host and seated players can keep the score");
+  }
+}
+
+function requireSetInRange(game: Game, setIndex: number) {
+  if (setIndex > Math.min(game.sets.length + 1, maximumSetCount)) {
+    throw new HttpError(400, "SET_OUT_OF_RANGE", "Score the sets in order, at most five");
+  }
+}
+
+function requireExistingSet(game: Game, setIndex: number) {
+  if (!game.sets.some((set) => set.index === setIndex)) {
+    throw new HttpError(404, "SET_NOT_FOUND", "This game has no such set");
+  }
+}
+
 export async function getGame(viewerAccountId: string, gameId: string): Promise<Game> {
   return loadVisibleGame(pool, viewerAccountId, gameId, findGameSummary);
 }
@@ -139,5 +164,40 @@ export async function declineInvitation(viewerAccountId: string, gameId: string)
 export async function freeSeat(viewerAccountId: string, gameId: string, seatIndex: number): Promise<Game> {
   return changeGame(viewerAccountId, gameId, async (client, game) => {
     await emptySeat(client, game.id, requireSeatTheViewerMayFree(game, viewerAccountId, seatIndex).index);
+  });
+}
+
+export async function scoreSet(
+  viewerAccountId: string,
+  gameId: string,
+  setIndex: number,
+  score: SetScore,
+): Promise<Game> {
+  return changeGame(viewerAccountId, gameId, async (client, game) => {
+    requireScorer(game);
+    requireSetInRange(game, setIndex);
+    await upsertSet(client, game.id, { index: setIndex, ...score });
+  });
+}
+
+export async function removeSet(viewerAccountId: string, gameId: string, setIndex: number): Promise<Game> {
+  return changeGame(viewerAccountId, gameId, async (client, game) => {
+    requireScorer(game);
+    requireExistingSet(game, setIndex);
+    await deleteSetAndMoveHigherSetsDown(client, game.id, setIndex);
+  });
+}
+
+export async function finishGame(viewerAccountId: string, gameId: string): Promise<Game> {
+  return changeGame(viewerAccountId, gameId, async (client, game) => {
+    requireScorer(game);
+    await markGameFinished(client, game.id);
+  });
+}
+
+export async function reopenGame(viewerAccountId: string, gameId: string): Promise<Game> {
+  return changeGame(viewerAccountId, gameId, async (client, game) => {
+    requireScorer(game);
+    await markGameReopened(client, game.id);
   });
 }

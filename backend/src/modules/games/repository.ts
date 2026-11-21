@@ -135,3 +135,41 @@ export async function emptySeat(db: Queryable, gameId: string, seatIndex: number
     [gameId, seatIndex],
   );
 }
+
+export async function upsertSet(db: Queryable, gameId: string, set: GameSet) {
+  await db.query(
+    `INSERT INTO game_sets (game_id, set_index, team_a, team_b)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (game_id, set_index) DO UPDATE SET team_a = EXCLUDED.team_a, team_b = EXCLUDED.team_b`,
+    [gameId, set.index, set.teamA, set.teamB],
+  );
+}
+
+export async function deleteSetAndMoveHigherSetsDown(db: Queryable, gameId: string, setIndex: number) {
+  const removed = await db.query<GameSet>(
+    `DELETE FROM game_sets
+      WHERE game_id = $1 AND set_index >= $2
+      RETURNING set_index AS "index", team_a AS "teamA", team_b AS "teamB"`,
+    [gameId, setIndex],
+  );
+  const higherSets = removed.rows.filter((set) => set.index > setIndex);
+  await db.query(
+    `INSERT INTO game_sets (game_id, set_index, team_a, team_b)
+     SELECT $1, moved.set_index - 1, moved.team_a, moved.team_b
+       FROM unnest($2::int[], $3::int[], $4::int[]) AS moved (set_index, team_a, team_b)`,
+    [
+      gameId,
+      higherSets.map((set) => set.index),
+      higherSets.map((set) => set.teamA),
+      higherSets.map((set) => set.teamB),
+    ],
+  );
+}
+
+export async function markGameFinished(db: Queryable, gameId: string) {
+  await db.query("UPDATE games SET finished_at = COALESCE(finished_at, now()) WHERE id = $1", [gameId]);
+}
+
+export async function markGameReopened(db: Queryable, gameId: string) {
+  await db.query("UPDATE games SET finished_at = NULL WHERE id = $1", [gameId]);
+}
