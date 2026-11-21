@@ -6,6 +6,7 @@ import { authRouter } from "./modules/auth/routes.js";
 import { cityAvailabilityRouter } from "./modules/availability/routes.js";
 import { bookingsRouter } from "./modules/bookings/routes.js";
 import { centersRouter } from "./modules/centers/routes.js";
+import { docsRouter } from "./modules/docs/routes.js";
 import { friendsRouter } from "./modules/friends/routes.js";
 import { gamesRouter } from "./modules/games/routes.js";
 import { peopleRouter } from "./modules/people/routes.js";
@@ -29,6 +30,7 @@ export function createApp() {
   app.use("/api/people", peopleRouter);
   app.use("/api/friends", friendsRouter);
   app.use("/api/games", gamesRouter);
+  app.use("/api/docs", docsRouter);
 
   app.use(unknownRouteHandler);
   app.use(errorHandler);
