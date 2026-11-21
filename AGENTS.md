@@ -6,7 +6,9 @@ A deliberately small padel court booking system.
   number of courts, slot length and the weekly intervals they are open.
 - **Players** use a mobile PWA to find a centre, pick a day, see which slots are free and book a court.
 
-No scraping, no tournaments, no social features.
+- **Every booking is a game** of four: the booker invites friends into the seats, and the players keep the score set by set.
+
+No scraping and no tournaments.
 
 ## Layout
 
