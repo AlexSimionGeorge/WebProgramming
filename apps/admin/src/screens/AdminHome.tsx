@@ -40,7 +40,9 @@ export function AdminHome({ account }: { account: Account }) {
             <div className="mb-7">
               <TabSwitch tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
             </div>
-            {activeTab === 'centre' && <CenterSetup center={center} onSaved={replaceCenter} />}
+            <div hidden={activeTab !== 'centre'}>
+              <CenterSetup center={center} onSaved={replaceCenter} />
+            </div>
             {activeTab === 'bookings' && center && <Bookings center={center} />}
           </>
         )}

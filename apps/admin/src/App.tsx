@@ -14,7 +14,7 @@ export function App() {
 
 function SessionGate() {
   const { status, account } = useSession()
-  if (status === 'restoring') return null
+  if (status === 'restoring') return <p className="py-24 text-center text-[14.5px] text-muted">Signing you in…</p>
   if (!account) return <AuthScreen />
   if (account.role !== 'centerAdmin') return <PlayerAccountNotice />
   return <AdminHome account={account} />

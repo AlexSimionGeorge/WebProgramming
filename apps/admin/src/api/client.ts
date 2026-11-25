@@ -15,6 +15,12 @@ export class ApiError extends Error {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
+let handleRejectedToken: () => void = () => {}
+
+export function onRejectedToken(handler: () => void) {
+  handleRejectedToken = handler
+}
+
 export async function apiRequest<T>(method: HttpMethod, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   const token = readToken()
@@ -36,6 +42,7 @@ export async function apiRequest<T>(method: HttpMethod, path: string, body?: unk
 
   const payload: unknown = await response.json().catch(() => null)
   if (response.ok) return payload as T
+  if (response.status === 401 && token) handleRejectedToken()
   throw toApiError(response.status, payload)
 }
 

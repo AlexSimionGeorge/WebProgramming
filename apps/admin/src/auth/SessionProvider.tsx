@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as authApi from '../api/auth'
-import { ApiError } from '../api/client'
+import { onRejectedToken } from '../api/client'
 import { clearToken, readToken, saveToken } from '../api/tokenStorage'
 import type { Account, AuthSession, Credentials } from '../api/types'
 import { SessionContext, type NewCenterAccount, type Session, type SessionStatus } from './SessionContext'
@@ -16,6 +16,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    onRejectedToken(signOut)
+  }, [signOut])
+
+  useEffect(() => {
     if (status !== 'restoring') return
     let cancelled = false
     authApi
@@ -25,10 +29,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setAccount(restored)
         setStatus('signedIn')
       })
-      .catch((error: unknown) => {
-        if (cancelled) return
-        if (error instanceof ApiError && error.status === 401) clearToken()
-        setStatus('signedOut')
+      .catch(() => {
+        if (!cancelled) setStatus('signedOut')
       })
     return () => {
       cancelled = true
