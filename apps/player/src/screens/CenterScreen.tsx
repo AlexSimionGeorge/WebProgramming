@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { getAvailability, getCenter } from '../api/centers'
 import { describeError } from '../api/errorMessage'
-import type { CenterDetails, CenterSummary, DayAvailability, Slot } from '../api/types'
+import type { CenterDetails, CenterSummary, DayAvailability, PlayerBooking, Slot } from '../api/types'
 import { BookingSheet, type SlotPick } from '../components/BookingSheet'
 import { DayStrip } from '../components/DayStrip'
 import { Notice } from '../components/Notice'
@@ -18,10 +18,10 @@ const BOOKABLE_DAYS = 14
 type CenterScreenProps = {
   center: CenterSummary
   onBack: () => void
-  onShowGames: () => void
+  onBooked: (booking: PlayerBooking) => void
 }
 
-export function CenterScreen({ center, onBack, onShowGames }: CenterScreenProps) {
+export function CenterScreen({ center, onBack, onBooked }: CenterScreenProps) {
   const [dates] = useState(() => upcomingDates(BOOKABLE_DAYS))
   const [selectedDate, setSelectedDate] = useState(todayIsoDate)
   const details = useRemote((signal) => getCenter(center.id, signal), [center.id])
@@ -97,7 +97,10 @@ export function CenterScreen({ center, onBack, onShowGames }: CenterScreenProps)
         onClose={() => setPick(null)}
         onAvailabilityChanged={availability.reload}
         onRefused={showRefusal}
-        onShowGames={onShowGames}
+        onBooked={(booking) => {
+          setPick(null)
+          onBooked(booking)
+        }}
       />
     </div>
   )

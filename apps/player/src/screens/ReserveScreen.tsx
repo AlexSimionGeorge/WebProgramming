@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getCityAvailability } from '../api/availability'
 import { describeError } from '../api/errorMessage'
+import type { PlayerBooking } from '../api/types'
 import { BookingSheet } from '../components/BookingSheet'
 import { Notice } from '../components/Notice'
 import { OptionRow } from '../components/OptionRow'
@@ -31,7 +32,7 @@ type BookingTarget = { date: string; option: ReserveOption; open: boolean }
  * The city as one time axis. The whole day is fetched once; the dial then re-ranks the options
  * locally, so the list moves with the drag instead of waiting on a request per tick.
  */
-export function ReserveScreen({ onShowGames }: { onShowGames: () => void }) {
+export function ReserveScreen({ onBooked }: { onBooked: (booking: PlayerBooking) => void }) {
   const [selectedDate, setSelectedDate] = useState(todayIsoDate)
   const [weekStart, setWeekStart] = useState(() => weekStartOf(todayIsoDate()))
   const [cursor, setCursor] = useState(DEFAULT_CURSOR)
@@ -141,7 +142,10 @@ export function ReserveScreen({ onShowGames }: { onShowGames: () => void }) {
           onClose={closeBooking}
           onAvailabilityChanged={city.refresh}
           onRefused={showRefusal}
-          onShowGames={onShowGames}
+          onBooked={(booking) => {
+            closeBooking()
+            onBooked(booking)
+          }}
         />
       )}
     </div>

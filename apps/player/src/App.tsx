@@ -1,14 +1,15 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useState } from 'react'
-import type { CenterSummary } from './api/types'
+import type { CenterSummary, PlayerBooking } from './api/types'
 import { TAB_ORDER, TabBar, type Tab } from './components/TabBar'
-import { spring } from './lib/motion'
+import { sheetSpring, spring } from './lib/motion'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
 import { FriendsScreen } from './screens/FriendsScreen'
 import { GameScreen } from './screens/GameScreen'
 import { GamesScreen } from './screens/GamesScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
+import { ReceiptScreen } from './screens/ReceiptScreen'
 import { ReserveScreen } from './screens/ReserveScreen'
 
 type TabNavigation = { tab: Tab; direction: number }
@@ -23,6 +24,7 @@ export function App() {
   const [navigation, setNavigation] = useState<TabNavigation>({ tab: 'reserve', direction: 0 })
   const [openCenter, setOpenCenter] = useState<CenterSummary | null>(null)
   const [openGameId, setOpenGameId] = useState<string | null>(null)
+  const [receipt, setReceipt] = useState<PlayerBooking | null>(null)
 
   const selectTab = (tab: Tab) => {
     if (tab === 'centers' && navigation.tab === 'centers') setOpenCenter(null)
@@ -34,7 +36,11 @@ export function App() {
   }
 
   const { tab, direction } = navigation
-  const showGames = () => selectTab('games')
+  const inviteFromReceipt = (booking: PlayerBooking) => {
+    setReceipt(null)
+    selectTab('games')
+    setOpenGameId(booking.gameId)
+  }
   const logIn = () => selectTab('profile')
   const findCourt = () => selectTab('reserve')
 
@@ -52,11 +58,11 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
-            {tab === 'reserve' && <ReserveScreen onShowGames={showGames} />}
+            {tab === 'reserve' && <ReserveScreen onBooked={setReceipt} />}
             {tab === 'centers' && (
               <PushStack pageKey={openCenter?.id ?? null}>
                 {openCenter ? (
-                  <CenterScreen center={openCenter} onBack={() => setOpenCenter(null)} onShowGames={showGames} />
+                  <CenterScreen center={openCenter} onBack={() => setOpenCenter(null)} onBooked={setReceipt} />
                 ) : (
                   <CentersScreen onOpenCenter={setOpenCenter} />
                 )}
@@ -81,6 +87,20 @@ export function App() {
         </AnimatePresence>
       </div>
       <TabBar activeTab={tab} onSelect={selectTab} />
+      <AnimatePresence>
+        {receipt && (
+          <motion.div
+            key={receipt.id}
+            className="fixed inset-0 z-30"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={sheetSpring}
+          >
+            <ReceiptScreen booking={receipt} onInvite={() => inviteFromReceipt(receipt)} onDone={() => setReceipt(null)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
