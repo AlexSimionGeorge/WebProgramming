@@ -25,28 +25,10 @@ export type CenterSummary = {
   courtCount: number
 }
 
-export type OpeningInterval = {
-  weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7
-  opensAt: string
-  closesAt: string
-}
-
-export type CenterDetails = CenterSummary & {
-  slotMinutes: 60 | 90 | 120
-  openingIntervals: OpeningInterval[]
-  courts: Court[]
-}
-
 export type Slot = {
   startsAt: string
   endsAt: string
   freeCourtIds: string[]
-}
-
-export type DayAvailability = {
-  date: string
-  slotMinutes: number
-  slots: Slot[]
 }
 
 export type BookingRequest = {
@@ -68,7 +50,7 @@ export type PlayerBooking = {
   gameId: string
 }
 
-/** One centre's day inside the city-wide answer: the same slots as `DayAvailability`, with the courts named. */
+/** One centre's day inside the city-wide answer: a centre's slots for the day, with the courts named. */
 export type CenterDay = {
   center: CenterSummary
   slotMinutes: number

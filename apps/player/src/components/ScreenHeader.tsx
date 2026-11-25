@@ -10,7 +10,7 @@ type ScreenHeaderProps = {
   backLabel?: string
 }
 
-export function ScreenHeader({ title, kicker, subtitle, onBack, backLabel = 'Centres' }: ScreenHeaderProps) {
+export function ScreenHeader({ title, kicker, subtitle, onBack, backLabel = 'Back' }: ScreenHeaderProps) {
   return (
     <header className="px-6 pb-6" style={{ paddingTop: 'var(--screen-top)' }}>
       {onBack ? (

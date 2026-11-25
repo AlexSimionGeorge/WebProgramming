@@ -28,9 +28,6 @@ export const isoWeekday = (isoDate: string) => ((atNoon(isoDate).getDay() + 6) %
 export const weekdayShort = (isoDate: string) =>
   atNoon(isoDate).toLocaleDateString('en-GB', { weekday: 'short' })
 
-export const weekdayLong = (isoDate: string) =>
-  atNoon(isoDate).toLocaleDateString('en-GB', { weekday: 'long' })
-
 export const dayOfMonth = (isoDate: string) => atNoon(isoDate).getDate()
 
 export function relativeDayLabel(isoDate: string): string {

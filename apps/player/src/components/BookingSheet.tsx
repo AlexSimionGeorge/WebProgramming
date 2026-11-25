@@ -12,7 +12,7 @@ import { Button } from './Button'
 import { ChoiceChip } from './ChoiceChip'
 import { Sheet } from './Sheet'
 
-export type SlotPick = { date: string; slot: Slot }
+type SlotPick = { date: string; slot: Slot }
 
 const REFUSAL_CODES = ['SLOT_TAKEN', 'NOT_A_SLOT', 'SLOT_IN_PAST']
 
