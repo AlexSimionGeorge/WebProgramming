@@ -13,6 +13,7 @@
   --color-primary-dark: #0e5c9e;
   --color-accent: #d8ff3e;
   --color-accent-dark: #a8cc00;
+  --color-accent-mark: #6f8f14;  /* lime for shapes that are not text: the dial's bars */
   --color-warm: #ff6b35;
 
   --font-display: "Bricolage Grotesque", system-ui, sans-serif;
