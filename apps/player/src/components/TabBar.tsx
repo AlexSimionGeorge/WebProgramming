@@ -1,23 +1,16 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { spring } from '../lib/motion'
-import { BallIcon, CourtIcon, DialIcon, FriendsIcon, PersonIcon } from './icons'
+import { DialIcon, FriendsIcon, HomeIcon, PersonIcon } from './icons'
 import { Press } from './Press'
 
-export type Tab = 'reserve' | 'centers' | 'games' | 'friends' | 'profile'
+export type Tab = 'home' | 'reserve' | 'friends' | 'profile'
 
-export const TAB_ORDER: Tab[] = ['reserve', 'centers', 'games', 'friends', 'profile']
+export const TAB_ORDER: Tab[] = ['home', 'reserve', 'friends', 'profile']
 
-const tabLabels: Record<Tab, string> = {
-  reserve: 'Reserve',
-  centers: 'Centres',
-  games: 'Games',
-  friends: 'Friends',
-  profile: 'Profile',
-}
-const tabIcons: Record<Tab, typeof CourtIcon> = {
+const tabLabels: Record<Tab, string> = { home: 'Home', reserve: 'Reserve', friends: 'Friends', profile: 'Profile' }
+const tabIcons: Record<Tab, typeof HomeIcon> = {
+  home: HomeIcon,
   reserve: DialIcon,
-  centers: CourtIcon,
-  games: BallIcon,
   friends: FriendsIcon,
   profile: PersonIcon,
 }

@@ -10,18 +10,10 @@ const strokeProps = (bold: boolean) => ({
 
 type IconProps = { bold?: boolean; className?: string }
 
-export const CourtIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
+export const HomeIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
   <svg {...strokeProps(bold)} className={className}>
-    <rect x="5" y="3.5" width="14" height="17" rx="2" />
-    <path d="M5 12h14M12 3.5v4.2M12 16.3v4.2" />
-  </svg>
-)
-
-/** A padel ball: the circle and its seam. */
-export const BallIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
-  <svg {...strokeProps(bold)} className={className}>
-    <circle cx="12" cy="12" r="8.4" />
-    <path d="M5.2 7.2c3.4 1.4 4.8 3.4 4.8 4.8s-1.4 3.4-4.8 4.8M18.8 7.2c-3.4 1.4-4.8 3.4-4.8 4.8s1.4 3.4 4.8 4.8" />
+    <path d="M4 10.6 12 4l8 6.6V19a1.4 1.4 0 0 1-1.4 1.4H5.4A1.4 1.4 0 0 1 4 19Z" />
+    <path d="M9.6 20.4v-5.6h4.8v5.6" />
   </svg>
 )
 

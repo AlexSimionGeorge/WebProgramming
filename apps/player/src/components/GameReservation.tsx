@@ -4,16 +4,16 @@ import { ChevronIcon } from './icons'
 import { Press } from './Press'
 
 /** The reservation the game sits on: the day, the hour, the court and the centre. */
-export function GameReservation({ game, onBack }: { game: Game; onBack: () => void }) {
+export function GameReservation({ game, onBack, backLabel }: { game: Game; onBack: () => void; backLabel: string }) {
   return (
     <header className="px-6 pb-5" style={{ paddingTop: 'var(--screen-top)' }}>
       <Press
         onClick={onBack}
-        aria-label="Back to games"
+        aria-label={`Back to ${backLabel.toLowerCase()}`}
         className="-ml-2 mb-2 flex h-10 items-center gap-1 pr-3 text-[14px] text-soft"
       >
         <ChevronIcon direction="left" />
-        Games
+        {backLabel}
       </Press>
       <div className="text-[13px] text-muted">{relativeDayLabel(game.date)}</div>
       <div className="mt-1 flex items-baseline gap-2">

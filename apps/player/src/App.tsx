@@ -1,18 +1,22 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useState } from 'react'
-import type { CenterSummary, PlayerBooking } from './api/types'
+import type { PlayerBooking } from './api/types'
+import { useSession } from './auth/SessionProvider'
 import { TAB_ORDER, TabBar, type Tab } from './components/TabBar'
 import { sheetSpring, spring } from './lib/motion'
-import { CenterScreen } from './screens/CenterScreen'
-import { CentersScreen } from './screens/CentersScreen'
 import { FriendsScreen } from './screens/FriendsScreen'
 import { GameScreen } from './screens/GameScreen'
-import { GamesScreen } from './screens/GamesScreen'
+import { HomeScreen } from './screens/HomeScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { ReceiptScreen } from './screens/ReceiptScreen'
 import { ReserveScreen } from './screens/ReserveScreen'
 
 type TabNavigation = { tab: Tab; direction: number }
+
+/** The tabs a game can be opened from, each keeping its own pushed game. */
+type GameTab = 'home' | 'profile'
+
+const backLabels: Record<GameTab, string> = { home: 'Home', profile: 'Profile' }
 
 const slide: Variants = {
   enter: (direction: number) => ({ opacity: 0, x: direction * 18 }),
@@ -21,28 +25,49 @@ const slide: Variants = {
 }
 
 export function App() {
-  const [navigation, setNavigation] = useState<TabNavigation>({ tab: 'reserve', direction: 0 })
-  const [openCenter, setOpenCenter] = useState<CenterSummary | null>(null)
-  const [openGameId, setOpenGameId] = useState<string | null>(null)
+  const session = useSession()
+  // Signed in, the app opens on what is coming up; signed out, browsing the courts needs no account.
+  const [navigation, setNavigation] = useState<TabNavigation>(() => ({
+    tab: session.status === 'anonymous' ? 'reserve' : 'home',
+    direction: 0,
+  }))
+  const [openGames, setOpenGames] = useState<Record<GameTab, string | null>>({ home: null, profile: null })
   const [receipt, setReceipt] = useState<PlayerBooking | null>(null)
 
+  const openGame = (gameTab: GameTab, gameId: string | null) =>
+    setOpenGames((current) => ({ ...current, [gameTab]: gameId }))
+
   const selectTab = (tab: Tab) => {
-    if (tab === 'centers' && navigation.tab === 'centers') setOpenCenter(null)
-    if (tab === 'games' && navigation.tab === 'games') setOpenGameId(null)
+    if ((tab === 'home' || tab === 'profile') && navigation.tab === tab) openGame(tab, null)
     setNavigation((current) => ({
       tab,
       direction: Math.sign(TAB_ORDER.indexOf(tab) - TAB_ORDER.indexOf(current.tab)),
     }))
   }
 
-  const { tab, direction } = navigation
   const inviteFromReceipt = (booking: PlayerBooking) => {
     setReceipt(null)
-    selectTab('games')
-    setOpenGameId(booking.gameId)
+    selectTab('home')
+    openGame('home', booking.gameId)
   }
-  const logIn = () => selectTab('profile')
-  const findCourt = () => selectTab('reserve')
+
+  const gameStack = (gameTab: GameTab, list: React.ReactNode) => {
+    const gameId = openGames[gameTab]
+    return (
+      <PushStack pageKey={gameId}>
+        {gameId ? (
+          <GameScreen
+            gameId={gameId}
+            onBack={() => openGame(gameTab, null)}
+            backLabel={backLabels[gameTab]}
+            onFindFriends={() => selectTab('friends')}
+          />
+        ) : list}
+      </PushStack>
+    )
+  }
+
+  const { tab, direction } = navigation
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -58,31 +83,18 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
+            {tab === 'home' && gameStack('home', (
+              <HomeScreen
+                onLogIn={() => selectTab('profile')}
+                onReserve={() => selectTab('reserve')}
+                onOpenGame={(gameId) => openGame('home', gameId)}
+              />
+            ))}
             {tab === 'reserve' && <ReserveScreen onBooked={setReceipt} />}
-            {tab === 'centers' && (
-              <PushStack pageKey={openCenter?.id ?? null}>
-                {openCenter ? (
-                  <CenterScreen center={openCenter} onBack={() => setOpenCenter(null)} onBooked={setReceipt} />
-                ) : (
-                  <CentersScreen onOpenCenter={setOpenCenter} />
-                )}
-              </PushStack>
-            )}
-            {tab === 'games' && (
-              <PushStack pageKey={openGameId}>
-                {openGameId ? (
-                  <GameScreen
-                    gameId={openGameId}
-                    onBack={() => setOpenGameId(null)}
-                    onFindFriends={() => selectTab('friends')}
-                  />
-                ) : (
-                  <GamesScreen onLogIn={logIn} onFindCourt={findCourt} onOpenGame={setOpenGameId} />
-                )}
-              </PushStack>
-            )}
-            {tab === 'friends' && <FriendsScreen onLogIn={logIn} />}
-            {tab === 'profile' && <ProfileScreen />}
+            {tab === 'friends' && <FriendsScreen onLogIn={() => selectTab('profile')} />}
+            {tab === 'profile' && gameStack('profile', (
+              <ProfileScreen onOpenGame={(gameId) => openGame('profile', gameId)} />
+            ))}
           </motion.main>
         </AnimatePresence>
       </div>

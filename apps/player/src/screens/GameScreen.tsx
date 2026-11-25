@@ -23,10 +23,12 @@ import { useRemote } from '../lib/useRemote'
 type GameScreenProps = {
   gameId: string
   onBack: () => void
+  /** Where back leads, said on the button. */
+  backLabel: string
   onFindFriends: () => void
 }
 
-export function GameScreen({ gameId, onBack, onFindFriends }: GameScreenProps) {
+export function GameScreen({ gameId, onBack, backLabel, onFindFriends }: GameScreenProps) {
   const remote = useRemote((signal) => getGame(gameId, signal), [gameId])
   /** Every write answers with the whole game; the newest answer wins over the first read. */
   const [latest, setLatest] = useState<Game | null>(null)
@@ -36,7 +38,7 @@ export function GameScreen({ gameId, onBack, onFindFriends }: GameScreenProps) {
   if (remote.status === 'loading') {
     return (
       <div className="h-full">
-        <ScreenHeader title="Game" onBack={onBack} backLabel="Games" />
+        <ScreenHeader title="Game" onBack={onBack} backLabel={backLabel} />
         <div className="px-5"><SkeletonList count={3} rowHeight={60} /></div>
       </div>
     )
@@ -45,30 +47,31 @@ export function GameScreen({ gameId, onBack, onFindFriends }: GameScreenProps) {
     const gone = isApiError(remote.error, 'GAME_NOT_FOUND')
     return (
       <div className="h-full">
-        <ScreenHeader title="Game" onBack={onBack} backLabel="Games" />
+        <ScreenHeader title="Game" onBack={onBack} backLabel={backLabel} />
         <div className="px-5">
           <Notice
             tone={gone ? 'calm' : 'warm'}
             message={describeError(remote.error)}
-            action={gone ? { label: 'Back to games', onClick: onBack } : { label: 'Try again', onClick: remote.reload }}
+            action={gone ? { label: `Back to ${backLabel.toLowerCase()}`, onClick: onBack } : { label: 'Try again', onClick: remote.reload }}
           />
         </div>
       </div>
     )
   }
 
-  return <GameDetails game={latest ?? remote.data} onChange={setLatest} onBack={onBack} onFindFriends={onFindFriends} />
+  return <GameDetails game={latest ?? remote.data} onChange={setLatest} onBack={onBack} backLabel={backLabel} onFindFriends={onFindFriends} />
 }
 
 type GameDetailsProps = {
   game: Game
   onChange: (game: Game) => void
   onBack: () => void
+  backLabel: string
   onFindFriends: () => void
 }
 
 /** One screen for everybody in the game; `game.viewer` decides which controls are there. */
-function GameDetails({ game, onChange, onBack, onFindFriends }: GameDetailsProps) {
+function GameDetails({ game, onChange, onBack, backLabel, onFindFriends }: GameDetailsProps) {
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
@@ -135,7 +138,7 @@ function GameDetails({ game, onChange, onBack, onFindFriends }: GameDetailsProps
   return (
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto noscroll pb-6">
-        <GameReservation game={game} onBack={onBack} />
+        <GameReservation game={game} onBack={onBack} backLabel={backLabel} />
         <div className="px-5">
           {problem && (
             <motion.p

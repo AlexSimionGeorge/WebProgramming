@@ -14,38 +14,42 @@ import { SkeletonList } from '../components/SkeletonList'
 import { hasStarted, splitGames } from '../lib/gameLists'
 import { useRemote } from '../lib/useRemote'
 
-type GamesScreenProps = {
+type HomeScreenProps = {
   onLogIn: () => void
-  onFindCourt: () => void
-  onOpenGame?: (gameId: string) => void
+  onReserve: () => void
+  onOpenGame: (gameId: string) => void
 }
 
-export function GamesScreen({ onLogIn, onFindCourt, onOpenGame }: GamesScreenProps) {
+/** What is waiting on me and what is coming up. */
+export function HomeScreen({ onLogIn, onReserve, onOpenGame }: HomeScreenProps) {
   const session = useSession()
 
   return (
     <div className="h-full overflow-y-auto noscroll pb-8">
-      <ScreenHeader kicker="Padel" title="Games" />
+      <ScreenHeader
+        kicker="Padel"
+        title={session.status === 'signedIn' ? `Hi, ${session.account.displayName.split(' ')[0]}` : 'Home'}
+      />
       <div className="px-5">
         {session.status === 'restoring' && <SkeletonList count={3} rowHeight={128} />}
         {session.status === 'anonymous' && (
           <Notice message="Log in to see your games and invitations." action={{ label: 'Log in', onClick: onLogIn }} />
         )}
         {session.status === 'signedIn' && (
-          <MyGames account={session.account} onFindCourt={onFindCourt} onOpenGame={onOpenGame} />
+          <ComingUp account={session.account} onReserve={onReserve} onOpenGame={onOpenGame} />
         )}
       </div>
     </div>
   )
 }
 
-type MyGamesProps = {
+type ComingUpProps = {
   account: Account
-  onFindCourt: () => void
-  onOpenGame?: (gameId: string) => void
+  onReserve: () => void
+  onOpenGame: (gameId: string) => void
 }
 
-function MyGames({ account, onFindCourt, onOpenGame }: MyGamesProps) {
+function ComingUp({ account, onReserve, onOpenGame }: ComingUpProps) {
   const games = useRemote(listMyGames, [account.id])
   const [answeringGameId, setAnsweringGameId] = useState<string | null>(null)
   const [problem, setProblem] = useState<string | null>(null)
@@ -56,9 +60,6 @@ function MyGames({ account, onFindCourt, onOpenGame }: MyGamesProps) {
   if (games.status === 'loading') return <SkeletonList count={3} rowHeight={128} />
   if (games.status === 'failed') {
     return <Notice tone="warm" message={describeError(games.error)} action={{ label: 'Try again', onClick: games.reload }} />
-  }
-  if (games.data.length === 0) {
-    return <Notice message="No games yet. Book a court, then invite your friends." action={{ label: 'Find a court', onClick: onFindCourt }} />
   }
 
   const answer = async (game: Game, respond: (gameId: string) => Promise<Game>) => {
@@ -74,8 +75,7 @@ function MyGames({ account, onFindCourt, onOpenGame }: MyGamesProps) {
     }
   }
 
-  const open = (game: Game) => (onOpenGame ? () => onOpenGame(game.id) : undefined)
-  const { invitations, upcoming, past } = splitGames(games.data)
+  const { invitations, upcoming } = splitGames(games.data)
 
   return (
     <>
@@ -87,34 +87,33 @@ function MyGames({ account, onFindCourt, onOpenGame }: MyGamesProps) {
             game={game}
             index={index}
             busy={answeringGameId === game.id}
-            onOpen={open(game)}
+            onOpen={() => onOpenGame(game.id)}
             onAccept={() => void answer(game, acceptInvitation)}
             onDecline={() => void answer(game, declineInvitation)}
           />
         ))}
       </ListSection>
-      <ListSection title="Upcoming" emptyMessage="Nothing coming up.">
-        {upcoming.map((game, index) => {
-          const started = hasStarted(game)
-          return (
-            <GameCard
-              key={game.id}
-              game={game}
-              index={invitations.length + index}
-              inProgress={started}
-              onOpen={open(game)}
-              onCancel={game.viewer.isHost && !started
-                ? () => setConfirmation(cancelBookingConfirmation(game, games.refresh))
-                : undefined}
-            />
-          )
-        })}
-      </ListSection>
-      <ListSection title="Past">
-        {past.map((game, index) => (
-          <GameCard key={game.id} game={game} index={invitations.length + upcoming.length + index} past onOpen={open(game)} />
-        ))}
-      </ListSection>
+      {upcoming.length === 0 ? (
+        <Notice message="No upcoming reservation." action={{ label: 'Reserve a court', onClick: onReserve, primary: true }} />
+      ) : (
+        <ListSection title="Upcoming">
+          {upcoming.map((game, index) => {
+            const started = hasStarted(game)
+            return (
+              <GameCard
+                key={game.id}
+                game={game}
+                index={invitations.length + index}
+                inProgress={started}
+                onOpen={() => onOpenGame(game.id)}
+                onCancel={game.viewer.isHost && !started
+                  ? () => setConfirmation(cancelBookingConfirmation(game, games.refresh))
+                  : undefined}
+              />
+            )
+          })}
+        </ListSection>
+      )}
       <ConfirmSheet confirmation={confirmation} onClose={() => setConfirmation(null)} />
     </>
   )
