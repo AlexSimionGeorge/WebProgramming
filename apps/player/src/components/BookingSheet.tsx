@@ -21,7 +21,7 @@ type BookingSheetProps = {
   center: CenterSummary
   courts: Court[] | null
   onClose: () => void
-  onBooked: () => void
+  onAvailabilityChanged: () => void
   onRefused: (message: string) => void
   onShowBookings: () => void
 }
@@ -53,7 +53,9 @@ type BookingPhase =
   | { kind: 'sending' }
   | { kind: 'booked'; booking: PlayerBooking }
 
-function BookingPanel({ pick, center, courts, onClose, onBooked, onRefused, onShowBookings, onSendingChange }: BookingPanelProps) {
+function BookingPanel({
+  pick, center, courts, onClose, onAvailabilityChanged, onRefused, onShowBookings, onSendingChange,
+}: BookingPanelProps) {
   const { status, logOut } = useSession()
   const [courtId, setCourtId] = useState(pick.slot.freeCourtIds[0] ?? '')
   const [phase, setPhase] = useState<BookingPhase>({ kind: 'choosing', problem: null })
@@ -69,7 +71,7 @@ function BookingPanel({ pick, center, courts, onClose, onBooked, onRefused, onSh
     try {
       const booking = await createBooking({ courtId, date: pick.date, startsAt: pick.slot.startsAt })
       setPhase({ kind: 'booked', booking })
-      onBooked()
+      onAvailabilityChanged()
     } catch (error) {
       if (isApiError(error) && REFUSAL_CODES.includes(error.code)) {
         onRefused(describeError(error))
@@ -77,6 +79,7 @@ function BookingPanel({ pick, center, courts, onClose, onBooked, onRefused, onSh
       }
       if (isApiError(error) && error.status === 401) logOut()
       setPhase({ kind: 'choosing', problem: describeError(error) })
+      onAvailabilityChanged()
     } finally {
       onSendingChange(false)
     }

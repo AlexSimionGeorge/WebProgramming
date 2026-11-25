@@ -20,7 +20,7 @@ export function DayStrip({ dates, selectedDate, onSelect }: DayStripProps) {
   }, [selectedDate, reduceMotion])
 
   return (
-    <div className="rail flex gap-1 px-4" role="tablist" aria-label="Day">
+    <motion.div layoutScroll className="rail flex gap-1 px-4" role="tablist" aria-label="Day">
       {dates.map((isoDate) => {
         const selected = isoDate === selectedDate
         return (
@@ -50,6 +50,6 @@ export function DayStrip({ dates, selectedDate, onSelect }: DayStripProps) {
           </Press>
         )
       })}
-    </div>
+    </motion.div>
   )
 }

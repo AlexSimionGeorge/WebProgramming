@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { getAvailability, getCenter } from '../api/centers'
 import { describeError } from '../api/errorMessage'
@@ -9,7 +9,7 @@ import { Notice } from '../components/Notice'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { SkeletonList } from '../components/SkeletonList'
 import { SlotRow } from '../components/SlotRow'
-import { isoWeekday, relativeDayLabel, todayIsoDate, upcomingDates, weekdayLong } from '../lib/dates'
+import { hasPassed, isoWeekday, relativeDayLabel, todayIsoDate, upcomingDates, weekdayLong } from '../lib/dates'
 import { springSoft } from '../lib/motion'
 import { useRemote } from '../lib/useRemote'
 
@@ -66,31 +66,28 @@ export function CenterScreen({ center, onBack, onShowBookings }: CenterScreenPro
             {refusal}
           </motion.p>
         )}
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={`${selectedDate}-${availability.status}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={springSoft}
-          >
-            {availability.status === 'loading' && <SkeletonList count={5} rowHeight={66} />}
-            {availability.status === 'failed' && (
-              <Notice
-                tone="warm"
-                message={describeError(availability.error)}
-                action={{ label: 'Try again', onClick: availability.reload }}
-              />
-            )}
-            {availability.status === 'ready' && (
-              <DaySlots
-                availability={availability.data}
-                details={details.status === 'ready' ? details.data : null}
-                onPick={pickSlot}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          key={`${selectedDate}-${availability.status}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={springSoft}
+        >
+          {availability.status === 'loading' && <SkeletonList count={5} rowHeight={66} />}
+          {availability.status === 'failed' && (
+            <Notice
+              tone="warm"
+              message={describeError(availability.error)}
+              action={{ label: 'Try again', onClick: availability.reload }}
+            />
+          )}
+          {availability.status === 'ready' && (
+            <DaySlots
+              availability={availability.data}
+              details={details.status === 'ready' ? details.data : null}
+              onPick={pickSlot}
+            />
+          )}
+        </motion.div>
       </div>
 
       <BookingSheet
@@ -98,7 +95,7 @@ export function CenterScreen({ center, onBack, onShowBookings }: CenterScreenPro
         center={center}
         courts={details.status === 'ready' ? details.data.courts : null}
         onClose={() => setPick(null)}
-        onBooked={availability.reload}
+        onAvailabilityChanged={availability.reload}
         onRefused={showRefusal}
         onShowBookings={onShowBookings}
       />
@@ -113,7 +110,8 @@ type DaySlotsProps = {
 }
 
 function DaySlots({ availability, details, onPick }: DaySlotsProps) {
-  const { date, slots } = availability
+  const { date } = availability
+  const slots = availability.slots.filter((slot) => !hasPassed(date, slot.startsAt))
 
   if (slots.length === 0) {
     const closed = details?.openingIntervals.every((interval) => interval.weekday !== isoWeekday(date))

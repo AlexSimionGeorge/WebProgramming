@@ -26,7 +26,7 @@
 
 /* Vertical density keyed on height, the scarce dimension on a phone. Tap targets never shrink. */
 :root {
-  --screen-top: max(env(safe-area-inset-top), 3.5rem);
+  --screen-top: max(calc(env(safe-area-inset-top) + 1rem), 3.5rem);
   --tab-floor: 22px;
   --row-y: 1rem;
   --row-gap: 0.75rem;
@@ -34,7 +34,7 @@
 
 @media (max-height: 750px) {
   :root {
-    --screen-top: max(env(safe-area-inset-top), 2.25rem);
+    --screen-top: max(calc(env(safe-area-inset-top) + 0.75rem), 2.25rem);
     --tab-floor: 18px;
     --row-y: 0.8125rem;
     --row-gap: 0.625rem;
@@ -43,7 +43,7 @@
 
 @media (max-height: 640px) {
   :root {
-    --screen-top: max(env(safe-area-inset-top), 1.5rem);
+    --screen-top: max(calc(env(safe-area-inset-top) + 0.5rem), 1.5rem);
     --tab-floor: 16px;
     --row-y: 0.6875rem;
     --row-gap: 0.5rem;
