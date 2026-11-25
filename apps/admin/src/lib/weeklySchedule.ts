@@ -1,5 +1,5 @@
 import type { OpeningInterval, Weekday } from '../api/types'
-import { minutesSinceMidnight, timeFromMinutes } from './time'
+import { closingMinutes, closingTimeForApi, closingTimeFromApi, minutesSinceMidnight, timeFromMinutes } from './time'
 import { WEEKDAYS } from './weekdays'
 
 export type TimeRange = { opensAt: string; closesAt: string }
@@ -21,12 +21,12 @@ export function defaultSchedule(): WeeklySchedule {
 
 export function scheduleFromIntervals(intervals: readonly OpeningInterval[]): WeeklySchedule {
   const schedule = emptySchedule()
-  for (const { weekday, opensAt, closesAt } of intervals) schedule[weekday].push({ opensAt, closesAt })
+  for (const { weekday, opensAt, closesAt } of intervals) schedule[weekday].push({ opensAt, closesAt: closingTimeFromApi(closesAt) })
   return schedule
 }
 
 export function intervalsFromSchedule(schedule: WeeklySchedule): OpeningInterval[] {
-  return WEEKDAYS.flatMap(({ weekday }) => schedule[weekday].map((range) => ({ weekday, ...range })))
+  return WEEKDAYS.flatMap(({ weekday }) => schedule[weekday].map((range) => ({ weekday, opensAt: range.opensAt, closesAt: closingTimeForApi(range.closesAt) })))
 }
 
 export function sortedByOpening(intervals: readonly OpeningInterval[]): OpeningInterval[] {
@@ -44,6 +44,6 @@ export function copyDayToAllDays(schedule: WeeklySchedule, source: Weekday): Wee
 export function suggestNextRange(existingRanges: readonly TimeRange[]): TimeRange {
   const lastRange = existingRanges.at(-1)
   if (!lastRange) return { ...DEFAULT_RANGE }
-  const opensAt = minutesSinceMidnight(lastRange.closesAt)
+  const opensAt = closingMinutes(lastRange.closesAt)
   return { opensAt: timeFromMinutes(opensAt), closesAt: timeFromMinutes(opensAt + SUGGESTED_RANGE_MINUTES) }
 }

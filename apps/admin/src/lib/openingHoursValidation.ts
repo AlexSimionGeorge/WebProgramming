@@ -1,5 +1,5 @@
 import type { Weekday } from '../api/types'
-import { isTimeOfDay, minutesSinceMidnight } from './time'
+import { closingMinutes, isTimeOfDay, minutesSinceMidnight } from './time'
 import type { TimeRange, WeeklySchedule } from './weeklySchedule'
 import { WEEKDAYS } from './weekdays'
 
@@ -30,14 +30,14 @@ function isWellFormed(range: TimeRange): boolean {
   return (
     isTimeOfDay(range.opensAt) &&
     isTimeOfDay(range.closesAt) &&
-    minutesSinceMidnight(range.opensAt) < minutesSinceMidnight(range.closesAt)
+    minutesSinceMidnight(range.opensAt) < closingMinutes(range.closesAt)
   )
 }
 
 function rangesOverlap(first: TimeRange, second: TimeRange): boolean {
   if (!isWellFormed(first) || !isWellFormed(second)) return false
   return (
-    minutesSinceMidnight(first.opensAt) < minutesSinceMidnight(second.closesAt) &&
-    minutesSinceMidnight(second.opensAt) < minutesSinceMidnight(first.closesAt)
+    minutesSinceMidnight(first.opensAt) < closingMinutes(second.closesAt) &&
+    minutesSinceMidnight(second.opensAt) < closingMinutes(first.closesAt)
   )
 }
