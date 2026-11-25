@@ -16,6 +16,7 @@ const calmMessages: Record<string, string> = {
   INVITATION_NOT_FOUND: 'That invitation is no longer open.',
   GAME_NOT_FOUND: 'This game is no longer there. It may have been cancelled.',
   HOST_CANNOT_LEAVE: 'The host keeps their seat. Cancel the booking instead.',
+  SET_NOT_FOUND: 'That set is no longer there.',
   SET_OUT_OF_RANGE: 'Sets are added one at a time, up to five.',
   NOT_A_PLAYER: 'This app is for players. Centre admins manage their centre on the admin site.',
 }

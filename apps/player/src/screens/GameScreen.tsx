@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { isApiError } from '../api/client'
 import { describeError } from '../api/errorMessage'
 import { acceptInvitation, declineInvitation, freeSeat, getGame, invitePerson } from '../api/games'
@@ -9,6 +9,7 @@ import { Button } from '../components/Button'
 import { cancelBookingConfirmation } from '../components/cancelBookingConfirmation'
 import { ConfirmSheet, type Confirmation } from '../components/ConfirmSheet'
 import { GameReservation } from '../components/GameReservation'
+import { GameScore } from '../components/GameScore'
 import { InviteFriends } from '../components/InviteFriends'
 import { Notice } from '../components/Notice'
 import { ScreenHeader } from '../components/ScreenHeader'
@@ -73,20 +74,31 @@ function GameDetails({ game, onChange, onBack, onFindFriends }: GameDetailsProps
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const { viewer } = game
   const ended = hasEnded(game)
+  const newestWrite = useRef(0)
 
-  /** Sends one write; `leavesGame` writes take the game away from the viewer, so the screen goes back. */
-  const write = async (send: () => Promise<Game>, leavesGame = false) => {
-    setBusy(true)
+  /**
+   * Sends one write and shows the game it answers with — unless a newer write went out meanwhile,
+   * whose answer will carry this one's change too. Resolves to null when it was refused.
+   */
+  const send = async (request: () => Promise<Game>): Promise<Game | null> => {
+    const writeNumber = ++newestWrite.current
     setProblem(null)
     try {
-      const updated = await send()
-      if (leavesGame) onBack()
-      else onChange(updated)
+      const updated = await request()
+      if (writeNumber === newestWrite.current) onChange(updated)
+      return updated
     } catch (error) {
       setProblem(describeError(error))
-    } finally {
-      setBusy(false)
+      return null
     }
+  }
+
+  /** A seat write, one at a time; `leavesGame` writes take the game away from the viewer, so the screen goes back. */
+  const write = async (request: () => Promise<Game>, leavesGame = false) => {
+    setBusy(true)
+    const updated = await send(request)
+    setBusy(false)
+    if (updated && leavesGame) onBack()
   }
 
   const withdraw = (seat: GameSeat) => void write(() => freeSeat(game.id, seat.index))
@@ -142,6 +154,10 @@ function GameDetails({ game, onChange, onBack, onFindFriends }: GameDetailsProps
             onWithdraw={viewer.isHost ? withdraw : undefined}
             onRemove={viewer.isHost ? confirmRemoval : undefined}
           />
+          <section className="mt-8">
+            <h2 className="mb-3 px-1 text-[12px] uppercase tracking-[0.14em] text-muted">Score</h2>
+            <GameScore game={game} send={send} />
+          </section>
           {canInvite && (
             <section className="mt-8">
               <h2 className="mb-3 px-1 text-[12px] uppercase tracking-[0.14em] text-muted">Invite friends</h2>
