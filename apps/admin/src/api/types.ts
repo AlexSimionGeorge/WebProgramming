@@ -51,6 +51,11 @@ export type CenterDetails = CenterConfiguration & {
   courts: Court[]
 }
 
+export type Person = {
+  id: string
+  displayName: string
+}
+
 export type AdminBooking = {
   id: string
   date: string
@@ -58,6 +63,7 @@ export type AdminBooking = {
   endsAt: string
   court: Court
   player: { displayName: string; email: string }
+  players?: Person[] // filled seats of the booking's game, host first; absent on older backends
 }
 
 export type ApiErrorBody = {

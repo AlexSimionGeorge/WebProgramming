@@ -23,3 +23,15 @@ function uniqueCourts(courts: readonly Court[]): Court[] {
 export function bookingCountLabel(count: number): string {
   return count === 1 ? '1 booking' : `${count} bookings`
 }
+
+export const SEATS_PER_GAME = 4
+
+export function playerNames(booking: AdminBooking): string[] {
+  const seatedPlayers = booking.players ?? []
+  return seatedPlayers.length > 0 ? seatedPlayers.map((person) => person.displayName) : [booking.player.displayName]
+}
+
+export function openSeatsLabel(filledSeatCount: number): string | null {
+  const openSeatCount = SEATS_PER_GAME - filledSeatCount
+  return openSeatCount > 0 ? `+ ${openSeatCount} open` : null
+}

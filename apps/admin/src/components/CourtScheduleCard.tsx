@@ -1,4 +1,5 @@
 import { bookingCountLabel, type CourtSchedule } from '../lib/bookingSchedule'
+import { BookingPlayers } from './BookingPlayers'
 
 export function CourtScheduleCard({ schedule }: { schedule: CourtSchedule }) {
   const { court, bookings } = schedule
@@ -18,7 +19,7 @@ export function CourtScheduleCard({ schedule }: { schedule: CourtSchedule }) {
                 {booking.startsAt}–{booking.endsAt}
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-[14.5px]">{booking.player.displayName}</span>
+                <BookingPlayers booking={booking} />
                 <a href={`mailto:${booking.player.email}`} className="block truncate text-[13px] text-muted hover:text-primary-fg">
                   {booking.player.email}
                 </a>
