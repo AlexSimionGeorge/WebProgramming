@@ -13,6 +13,7 @@ const calmMessages: Record<string, string> = {
   NOT_A_FRIEND: 'You can only invite friends. Add them in Friends first.',
   GAME_FULL: 'All four seats are taken.',
   ALREADY_IN_GAME: 'They’re already in this game.',
+  INVITATION_NOT_FOUND: 'That invitation is no longer open.',
   GAME_NOT_FOUND: 'This game is no longer there. It may have been cancelled.',
   HOST_CANNOT_LEAVE: 'The host keeps their seat. Cancel the booking instead.',
   SET_OUT_OF_RANGE: 'Sets are added one at a time, up to five.',

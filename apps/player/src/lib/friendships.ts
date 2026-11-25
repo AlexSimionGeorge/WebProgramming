@@ -36,3 +36,11 @@ export function personAction(friendship: Friendship | null): PersonAction {
 }
 
 export const MIN_SEARCH_LENGTH = 2
+
+/** My accepted friends whose name holds `query`, ignoring case; everybody when the query is empty. */
+export function friendsMatching(friendships: readonly Friendship[], query: string) {
+  const needle = query.trim().toLocaleLowerCase()
+  return groupFriendships([...friendships]).friends
+    .map((friendship) => friendship.person)
+    .filter((person) => person.displayName.toLocaleLowerCase().includes(needle))
+}

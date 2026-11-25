@@ -6,19 +6,21 @@ type ScreenHeaderProps = {
   kicker?: string
   subtitle?: React.ReactNode
   onBack?: () => void
+  /** Where back leads, said on the button. */
+  backLabel?: string
 }
 
-export function ScreenHeader({ title, kicker, subtitle, onBack }: ScreenHeaderProps) {
+export function ScreenHeader({ title, kicker, subtitle, onBack, backLabel = 'Centres' }: ScreenHeaderProps) {
   return (
     <header className="px-6 pb-6" style={{ paddingTop: 'var(--screen-top)' }}>
       {onBack ? (
         <Press
           onClick={onBack}
-          aria-label="Back to centres"
+          aria-label={`Back to ${backLabel.toLowerCase()}`}
           className="-ml-2 mb-2 flex h-10 items-center gap-1 pr-3 text-[14px] text-soft"
         >
           <ChevronIcon direction="left" />
-          Centres
+          {backLabel}
         </Press>
       ) : (
         kicker && (
