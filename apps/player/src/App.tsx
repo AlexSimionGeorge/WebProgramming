@@ -45,7 +45,7 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
-            {tab === 'reserve' && <ReserveScreen />}
+            {tab === 'reserve' && <ReserveScreen onShowBookings={() => selectTab('bookings')} />}
             {tab === 'centers' && (
               <CentresStack
                 openCenter={openCenter}
