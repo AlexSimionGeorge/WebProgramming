@@ -1,12 +1,12 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useState } from 'react'
 import type { CenterSummary } from './api/types'
-import { Notice } from './components/Notice'
 import { TAB_ORDER, TabBar, type Tab } from './components/TabBar'
 import { spring } from './lib/motion'
 import { BookingsScreen } from './screens/BookingsScreen'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
+import { ProfileScreen } from './screens/ProfileScreen'
 
 type TabNavigation = { tab: Tab; direction: number }
 
@@ -55,7 +55,7 @@ export function App() {
             {tab === 'bookings' && (
               <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('centers')} />
             )}
-            {tab === 'profile' && <Notice message="Coming soon." />}
+            {tab === 'profile' && <ProfileScreen />}
           </motion.main>
         </AnimatePresence>
       </div>
