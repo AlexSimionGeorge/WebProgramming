@@ -46,3 +46,9 @@ export const shortDateLabel = (isoDate: string) =>
 export function hasPassed(isoDate: string, time: string, now = new Date()): boolean {
   return `${isoDate}T${time}` <= `${toIsoDate(now)}T${toIsoTime(now)}`
 }
+
+/** `HH:MM` → minutes since midnight. */
+export const minutesOfDay = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
+
+/** Minutes since midnight → `HH:MM`. */
+export const clockTime = (minutes: number) => `${twoDigits(Math.floor(minutes / 60))}:${twoDigits(minutes % 60)}`

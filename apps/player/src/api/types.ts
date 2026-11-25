@@ -63,3 +63,17 @@ export type PlayerBooking = {
   court: Court
   center: Pick<CenterSummary, 'id' | 'name' | 'address' | 'city'>
 }
+
+/** One centre's day inside the city-wide answer: the same slots as `DayAvailability`, with the courts named. */
+export type CenterDay = {
+  center: CenterSummary
+  slotMinutes: number
+  courts: Court[]
+  slots: Slot[]
+}
+
+/** Every centre's day at once, sorted by centre name; a closed centre comes back with `slots: []`. */
+export type CityAvailability = {
+  date: string
+  centers: CenterDay[]
+}
