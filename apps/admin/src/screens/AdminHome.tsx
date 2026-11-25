@@ -1,21 +1,22 @@
 import { useState } from 'react'
 import type { Account } from '../api/types'
 import { useSession } from '../auth/useSession'
-import { useCenter } from '../center/useCenter'
+import { useCenter } from '../hooks/useCenter'
 import { Button } from '../components/Button'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { TabSwitch } from '../components/TabSwitch'
 import { TopBar } from '../components/TopBar'
+import { Bookings } from './Bookings'
 import { CenterSetup } from './CenterSetup'
 
 type AdminTab = 'centre' | 'bookings'
 
 export function AdminHome({ account }: { account: Account }) {
   const { logOut } = useSession()
-  const { state, retry, replaceCenter } = useCenter()
+  const { state, retry, replaceData: replaceCenter } = useCenter()
   const [activeTab, setActiveTab] = useState<AdminTab>('centre')
 
-  const center = state.status === 'ready' ? state.center : null
+  const center = state.status === 'ready' ? state.data : null
   const tabs = [
     { id: 'centre', label: 'Centre' },
     { id: 'bookings', label: 'Bookings', disabled: center === null },
@@ -40,6 +41,7 @@ export function AdminHome({ account }: { account: Account }) {
               <TabSwitch tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
             </div>
             {activeTab === 'centre' && <CenterSetup center={center} onSaved={replaceCenter} />}
+            {activeTab === 'bookings' && center && <Bookings center={center} />}
           </>
         )}
       </main>
