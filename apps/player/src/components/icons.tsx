@@ -31,6 +31,13 @@ export const PersonIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: Ic
   </svg>
 )
 
+export const DialIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
+  <svg {...strokeProps(bold)} className={className}>
+    <circle cx="12" cy="12" r="8.4" />
+    <path d="M12 7.4V12l3 2" />
+  </svg>
+)
+
 export const ChevronIcon = ({ direction, className = 'h-5 w-5' }: { direction: 'left' | 'right'; className?: string }) => (
   <svg {...strokeProps(false)} strokeWidth={2.2} className={className}>
     <path d={direction === 'left' ? 'M15 5 8 12l7 7' : 'M9 5l7 7-7 7'} />

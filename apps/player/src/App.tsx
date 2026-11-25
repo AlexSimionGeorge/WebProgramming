@@ -7,6 +7,7 @@ import { BookingsScreen } from './screens/BookingsScreen'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
+import { ReserveScreen } from './screens/ReserveScreen'
 
 type TabNavigation = { tab: Tab; direction: number }
 
@@ -17,7 +18,7 @@ const slide: Variants = {
 }
 
 export function App() {
-  const [navigation, setNavigation] = useState<TabNavigation>({ tab: 'centers', direction: 0 })
+  const [navigation, setNavigation] = useState<TabNavigation>({ tab: 'reserve', direction: 0 })
   const [openCenter, setOpenCenter] = useState<CenterSummary | null>(null)
 
   const selectTab = (tab: Tab) => {
@@ -44,6 +45,7 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
+            {tab === 'reserve' && <ReserveScreen />}
             {tab === 'centers' && (
               <CentresStack
                 openCenter={openCenter}
@@ -53,7 +55,7 @@ export function App() {
               />
             )}
             {tab === 'bookings' && (
-              <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('centers')} />
+              <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('reserve')} />
             )}
             {tab === 'profile' && <ProfileScreen />}
           </motion.main>
