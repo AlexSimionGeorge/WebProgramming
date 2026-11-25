@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0d10;
+  --color-surface: #14181d;
+  --color-elevated: #1c2229;
+  --color-line: #262e36;
+  --color-muted: #7d8b99;
+  --color-soft: #a3aeb8;
+  --color-faint: #39434c;
+  --color-primary: #1b7fc4;
+  --color-primary-fg: #3a9ade;
+  --color-primary-dark: #0e5c9e;
+  --color-accent: #d8ff3e;
+  --color-accent-dark: #a8cc00;
+  --color-warm: #ff6b35;
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+}
+
+/*
+ * Blue is what the player chose, lime is what the app found out (free court counts),
+ * warm is what was refused. Lime is never a control and never carries state.
+ */
+
+/* Vertical density keyed on height, the scarce dimension on a phone. Tap targets never shrink. */
+:root {
+  --screen-top: max(env(safe-area-inset-top), 3.5rem);
+  --tab-floor: 22px;
+  --row-y: 1rem;
+  --row-gap: 0.75rem;
+}
+
+@media (max-height: 750px) {
+  :root {
+    --screen-top: max(env(safe-area-inset-top), 2.25rem);
+    --tab-floor: 18px;
+    --row-y: 0.8125rem;
+    --row-gap: 0.625rem;
+  }
+}
+
+@media (max-height: 640px) {
+  :root {
+    --screen-top: max(env(safe-area-inset-top), 1.5rem);
+    --tab-floor: 16px;
+    --row-y: 0.6875rem;
+    --row-gap: 0.5rem;
+  }
+}
+
+@layer base {
+  * { border-color: var(--color-line); -webkit-tap-highlight-color: transparent; }
+  html { background: var(--color-bg); color-scheme: dark; }
+  html, body, #root { height: 100%; height: 100dvh; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: #fff;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    background-image: radial-gradient(ellipse 120% 60% at 50% -10%, #16202a 0%, #0a0d10 62%);
+    background-attachment: fixed;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  input { font: inherit; }
+  ::selection { background: var(--color-primary); color: #fff; }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--color-primary-fg); outline-offset: 2px; border-radius: 14px; }
+}
+
+@utility font-display { font-family: var(--font-display); letter-spacing: -0.03em; }
+
+@utility tnum { font-variant-numeric: tabular-nums; }
+
+@utility rail {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.rail::-webkit-scrollbar { display: none; }
+
+@utility noscroll { scrollbar-width: none; }
+.noscroll::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
