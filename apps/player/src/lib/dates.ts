@@ -52,3 +52,17 @@ export const minutesOfDay = (time: string) => Number(time.slice(0, 2)) * 60 + Nu
 
 /** Minutes since midnight → `HH:MM`. */
 export const clockTime = (minutes: number) => `${twoDigits(Math.floor(minutes / 60))}:${twoDigits(minutes % 60)}`
+
+/** The Monday of the week `isoDate` falls in. */
+export const weekStartOf = (isoDate: string) => addDays(isoDate, 1 - isoWeekday(isoDate))
+
+export const weekDates = (weekStart: string) => upcomingDates(7, weekStart)
+
+const monthShort = (isoDate: string) => atNoon(isoDate).toLocaleDateString('en-GB', { month: 'long' })
+
+/** "November", or "October – November" for a week that straddles two months. */
+export function weekMonthLabel(weekStart: string): string {
+  const first = monthShort(weekStart)
+  const last = monthShort(addDays(weekStart, 6))
+  return first === last ? first : `${first} – ${last}`
+}
