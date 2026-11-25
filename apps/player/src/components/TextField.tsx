@@ -4,11 +4,12 @@ type TextFieldProps = {
   label: string
   value: string
   onChange: (value: string) => void
-  type?: 'text' | 'email' | 'password'
+  type?: 'text' | 'email' | 'password' | 'search'
   autoComplete?: string
+  placeholder?: string
 }
 
-export function TextField({ label, value, onChange, type = 'text', autoComplete }: TextFieldProps) {
+export function TextField({ label, value, onChange, type = 'text', autoComplete, placeholder }: TextFieldProps) {
   const id = useId()
   return (
     <label htmlFor={id} className="block">
@@ -19,6 +20,8 @@ export function TextField({ label, value, onChange, type = 'text', autoComplete 
         value={value}
         onChange={(event) => onChange(event.target.value)}
         autoComplete={autoComplete}
+        placeholder={placeholder}
+        enterKeyHint={type === 'search' ? 'search' : undefined}
         inputMode={type === 'email' ? 'email' : undefined}
         autoCapitalize={type === 'text' ? 'words' : 'none'}
         autoCorrect="off"

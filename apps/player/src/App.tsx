@@ -6,6 +6,7 @@ import { spring } from './lib/motion'
 import { BookingsScreen } from './screens/BookingsScreen'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
+import { FriendsScreen } from './screens/FriendsScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { ReserveScreen } from './screens/ReserveScreen'
 
@@ -57,6 +58,7 @@ export function App() {
             {tab === 'bookings' && (
               <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('reserve')} />
             )}
+            {tab === 'friends' && <FriendsScreen onLogIn={() => selectTab('profile')} />}
             {tab === 'profile' && <ProfileScreen />}
           </motion.main>
         </AnimatePresence>

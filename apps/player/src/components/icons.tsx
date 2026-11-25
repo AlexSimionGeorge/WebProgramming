@@ -31,6 +31,14 @@ export const PersonIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: Ic
   </svg>
 )
 
+export const FriendsIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
+  <svg {...strokeProps(bold)} className={className}>
+    <path d="M9.2 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" />
+    <path d="M3.4 19.6c0-3.2 2.6-5 5.8-5s5.8 1.8 5.8 5" />
+    <path d="M15.4 4.9a3.2 3.2 0 0 1 0 5.9M17.6 14.9c1.8.6 3 2.2 3 4.7" />
+  </svg>
+)
+
 export const DialIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
   <svg {...strokeProps(bold)} className={className}>
     <circle cx="12" cy="12" r="8.4" />

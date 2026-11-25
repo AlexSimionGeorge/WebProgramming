@@ -12,6 +12,8 @@ type RemoteControls = {
   refresh: () => void
 }
 
+export type RemoteResource<T> = Remote<T> & RemoteControls
+
 /**
  * Loads data whenever `dependencies` change, or on `reload` / `refresh`. A change of dependencies
  * always drops the old data: it answered a different question.
@@ -19,7 +21,7 @@ type RemoteControls = {
 export function useRemote<T>(
   load: (signal: AbortSignal) => Promise<T>,
   dependencies: DependencyList,
-): Remote<T> & RemoteControls {
+): RemoteResource<T> {
   const [remote, setRemote] = useState<Remote<T>>({ status: 'loading' })
   const [generation, setGeneration] = useState(0)
   const keepCurrentData = useRef(false)
