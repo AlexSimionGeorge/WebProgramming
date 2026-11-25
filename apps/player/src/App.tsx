@@ -4,6 +4,7 @@ import type { CenterSummary } from './api/types'
 import { Notice } from './components/Notice'
 import { TAB_ORDER, TabBar, type Tab } from './components/TabBar'
 import { spring } from './lib/motion'
+import { BookingsScreen } from './screens/BookingsScreen'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
 
@@ -43,16 +44,18 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
-            {tab === 'centers' ? (
+            {tab === 'centers' && (
               <CentresStack
                 openCenter={openCenter}
                 onOpen={setOpenCenter}
                 onBack={() => setOpenCenter(null)}
                 onShowBookings={() => selectTab('bookings')}
               />
-            ) : (
-              <Notice message="Coming soon." />
             )}
+            {tab === 'bookings' && (
+              <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('centers')} />
+            )}
+            {tab === 'profile' && <Notice message="Coming soon." />}
           </motion.main>
         </AnimatePresence>
       </div>

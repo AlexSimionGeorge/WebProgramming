@@ -43,6 +43,6 @@ export function relativeDayLabel(isoDate: string): string {
 export const shortDateLabel = (isoDate: string) =>
   atNoon(isoDate).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 
-export function hasStarted(isoDate: string, startsAt: string, now = new Date()): boolean {
-  return `${isoDate}T${startsAt}` <= `${toIsoDate(now)}T${toIsoTime(now)}`
+export function hasPassed(isoDate: string, time: string, now = new Date()): boolean {
+  return `${isoDate}T${time}` <= `${toIsoDate(now)}T${toIsoTime(now)}`
 }
