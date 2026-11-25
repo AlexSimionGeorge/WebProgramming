@@ -44,7 +44,12 @@ export function App() {
             className="absolute inset-0"
           >
             {tab === 'centers' ? (
-              <CentresStack openCenter={openCenter} onOpen={setOpenCenter} onBack={() => setOpenCenter(null)} />
+              <CentresStack
+                openCenter={openCenter}
+                onOpen={setOpenCenter}
+                onBack={() => setOpenCenter(null)}
+                onShowBookings={() => selectTab('bookings')}
+              />
             ) : (
               <Notice message="Coming soon." />
             )}
@@ -60,9 +65,10 @@ type CentresStackProps = {
   openCenter: CenterSummary | null
   onOpen: (center: CenterSummary) => void
   onBack: () => void
+  onShowBookings: () => void
 }
 
-function CentresStack({ openCenter, onOpen, onBack }: CentresStackProps) {
+function CentresStack({ openCenter, onOpen, onBack, onShowBookings }: CentresStackProps) {
   const direction = openCenter ? 1 : -1
   return (
     <AnimatePresence mode="popLayout" initial={false} custom={direction}>
@@ -76,7 +82,11 @@ function CentresStack({ openCenter, onOpen, onBack }: CentresStackProps) {
         transition={spring}
         className="absolute inset-0"
       >
-        {openCenter ? <CenterScreen center={openCenter} onBack={onBack} /> : <CentersScreen onOpenCenter={onOpen} />}
+        {openCenter ? (
+          <CenterScreen center={openCenter} onBack={onBack} onShowBookings={onShowBookings} />
+        ) : (
+          <CentersScreen onOpenCenter={onOpen} />
+        )}
       </motion.div>
     </AnimatePresence>
   )

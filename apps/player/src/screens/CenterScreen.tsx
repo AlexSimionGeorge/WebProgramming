@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { getAvailability, getCenter } from '../api/centers'
 import { describeError } from '../api/errorMessage'
 import type { CenterDetails, CenterSummary, DayAvailability, Slot } from '../api/types'
+import { BookingSheet, type SlotPick } from '../components/BookingSheet'
 import { DayStrip } from '../components/DayStrip'
 import { Notice } from '../components/Notice'
 import { ScreenHeader } from '../components/ScreenHeader'
@@ -17,24 +18,54 @@ const BOOKABLE_DAYS = 14
 type CenterScreenProps = {
   center: CenterSummary
   onBack: () => void
+  onShowBookings: () => void
 }
 
-export function CenterScreen({ center, onBack }: CenterScreenProps) {
+export function CenterScreen({ center, onBack, onShowBookings }: CenterScreenProps) {
   const [dates] = useState(() => upcomingDates(BOOKABLE_DAYS))
   const [selectedDate, setSelectedDate] = useState(todayIsoDate)
   const details = useRemote((signal) => getCenter(center.id, signal), [center.id])
   const availability = useRemote((signal) => getAvailability(center.id, selectedDate, signal), [center.id, selectedDate])
+  const [pick, setPick] = useState<SlotPick | null>(null)
+  const [refusal, setRefusal] = useState<string | null>(null)
+
+  const selectDate = (isoDate: string) => {
+    setRefusal(null)
+    setSelectedDate(isoDate)
+  }
+
+  const pickSlot = (slot: Slot) => {
+    setRefusal(null)
+    setPick({ date: selectedDate, slot })
+  }
+
+  const showRefusal = (message: string) => {
+    setPick(null)
+    setRefusal(message)
+    availability.reload()
+  }
 
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0">
         <ScreenHeader onBack={onBack} title={center.name} subtitle={`${center.address} · ${center.city}`} />
         <div className="border-b border-elevated pb-3">
-          <DayStrip dates={dates} selectedDate={selectedDate} onSelect={setSelectedDate} />
+          <DayStrip dates={dates} selectedDate={selectedDate} onSelect={selectDate} />
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto noscroll px-5 pt-4 pb-6">
+        {refusal && (
+          <motion.p
+            role="alert"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={springSoft}
+            className="mb-3 px-1 text-[13.5px] leading-snug text-warm"
+          >
+            {refusal}
+          </motion.p>
+        )}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`${selectedDate}-${availability.status}`}
@@ -55,12 +86,22 @@ export function CenterScreen({ center, onBack }: CenterScreenProps) {
               <DaySlots
                 availability={availability.data}
                 details={details.status === 'ready' ? details.data : null}
-                onPick={() => undefined}
+                onPick={pickSlot}
               />
             )}
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <BookingSheet
+        pick={pick}
+        center={center}
+        courts={details.status === 'ready' ? details.data.courts : null}
+        onClose={() => setPick(null)}
+        onBooked={availability.reload}
+        onRefused={showRefusal}
+        onShowBookings={onShowBookings}
+      />
     </div>
   )
 }
