@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme inline {
+  --radius-sm: .5rem;  --radius-md: .75rem; --radius-lg: 1rem;
+  --radius-xl: 1.25rem; --radius-2xl: 1.5rem;
+
+  --color-bg:       #0a0d10;
+  --color-surface:  #14181d;
+  --color-elevated: #1c2229;
+  --color-line:     #262e36;
+  --color-fg:       #ffffff;
+  --color-muted:    #7d8b99;
+  --color-faint:    #4a555f;
+  --color-primary:  #1b7fc4;
+  --color-primary-fg: #3a9ade;
+  --color-primary-dark: #0e5c9e;
+  --color-on-primary: #ffffff;
+  --color-accent:      #d8ff3e;
+  --color-accent-dark: #a8cc00;
+  --color-warm:     #ff6b35;
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  html { background: var(--color-bg); color-scheme: dark; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(ellipse 120% 60% at 50% -10%, #16202a 0%, #0a0d10 62%);
+    background-attachment: fixed;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  button:disabled { cursor: default; }
+  input, select { font: inherit; }
+  ::selection { background: var(--color-primary); color: var(--color-on-primary); }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--color-primary-fg); outline-offset: 2px; border-radius: 14px; }
+}
+
+@utility font-display { font-family: var(--font-display); letter-spacing: -.03em; }
+
+@utility tnum { font-variant-numeric: tabular-nums; }
+
+@utility pressable {
+  transition: transform 120ms ease, background-color 150ms ease, color 150ms ease;
+  &:active:not(:disabled) { transform: scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
