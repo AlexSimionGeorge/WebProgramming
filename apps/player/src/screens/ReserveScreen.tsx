@@ -31,7 +31,7 @@ type BookingTarget = { date: string; option: ReserveOption; open: boolean }
  * The city as one time axis. The whole day is fetched once; the dial then re-ranks the options
  * locally, so the list moves with the drag instead of waiting on a request per tick.
  */
-export function ReserveScreen({ onShowBookings }: { onShowBookings: () => void }) {
+export function ReserveScreen({ onShowGames }: { onShowGames: () => void }) {
   const [selectedDate, setSelectedDate] = useState(todayIsoDate)
   const [weekStart, setWeekStart] = useState(() => weekStartOf(todayIsoDate()))
   const [cursor, setCursor] = useState(DEFAULT_CURSOR)
@@ -141,7 +141,7 @@ export function ReserveScreen({ onShowBookings }: { onShowBookings: () => void }
           onClose={closeBooking}
           onAvailabilityChanged={city.refresh}
           onRefused={showRefusal}
-          onShowBookings={onShowBookings}
+          onShowGames={onShowGames}
         />
       )}
     </div>

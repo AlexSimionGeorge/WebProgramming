@@ -23,7 +23,7 @@ type BookingSheetProps = {
   onClose: () => void
   onAvailabilityChanged: () => void
   onRefused: (message: string) => void
-  onShowBookings: () => void
+  onShowGames: () => void
 }
 
 export function BookingSheet({ pick, onClose, ...panelProps }: BookingSheetProps) {
@@ -54,7 +54,7 @@ type BookingPhase =
   | { kind: 'booked'; booking: PlayerBooking }
 
 function BookingPanel({
-  pick, center, courts, onClose, onAvailabilityChanged, onRefused, onShowBookings, onSendingChange,
+  pick, center, courts, onClose, onAvailabilityChanged, onRefused, onShowGames, onSendingChange,
 }: BookingPanelProps) {
   const { status, logOut } = useSession()
   const [courtId, setCourtId] = useState(pick.slot.freeCourtIds[0] ?? '')
@@ -91,7 +91,7 @@ function BookingPanel({
       <AnimatePresence mode="wait" initial={false}>
         {phase.kind === 'booked' ? (
           <motion.div key="booked" {...fadeSwap}>
-            <BookedConfirmation booking={phase.booking} onShowBookings={onShowBookings} onDone={onClose} />
+            <BookedConfirmation booking={phase.booking} onShowGames={onShowGames} onDone={onClose} />
           </motion.div>
         ) : status !== 'signedIn' ? (
           <motion.div key="auth" {...fadeSwap}>
@@ -145,21 +145,21 @@ function SlotSummary({ center, pick }: { center: CenterSummary; pick: SlotPick }
 
 type BookedConfirmationProps = {
   booking: PlayerBooking
-  onShowBookings: () => void
+  onShowGames: () => void
   onDone: () => void
 }
 
-function BookedConfirmation({ booking, onShowBookings, onDone }: BookedConfirmationProps) {
+function BookedConfirmation({ booking, onShowGames, onDone }: BookedConfirmationProps) {
   return (
     <div>
       <div className="rounded-2xl border border-primary/45 bg-[#0d1a26] px-5 py-4">
         <div className="text-[13px] text-primary-fg">Booked</div>
         <div className="mt-1 text-[16px]">{booking.court.name} is yours.</div>
-        <div className="mt-0.5 text-[13px] text-muted">You can cancel it from Bookings until it starts.</div>
+        <div className="mt-0.5 text-[13px] text-muted">You can invite friends or cancel it from Games.</div>
       </div>
       <div className="mt-5 space-y-3">
         <Button onClick={onDone}>Done</Button>
-        <Button variant="quiet" onClick={onShowBookings}>See my bookings</Button>
+        <Button variant="quiet" onClick={onShowGames}>See my games</Button>
       </div>
     </div>
   )

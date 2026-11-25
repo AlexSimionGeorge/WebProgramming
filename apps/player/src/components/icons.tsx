@@ -17,10 +17,11 @@ export const CourtIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: Ico
   </svg>
 )
 
-export const CalendarIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
+/** A padel ball: the circle and its seam. */
+export const BallIcon = ({ bold = false, className = 'h-[22px] w-[22px]' }: IconProps) => (
   <svg {...strokeProps(bold)} className={className}>
-    <rect x="3.8" y="5.2" width="16.4" height="15" rx="2.6" />
-    <path d="M3.8 10h16.4M8.4 3.2v3.6M15.6 3.2v3.6" />
+    <circle cx="12" cy="12" r="8.4" />
+    <path d="M5.2 7.2c3.4 1.4 4.8 3.4 4.8 4.8s-1.4 3.4-4.8 4.8M18.8 7.2c-3.4 1.4-4.8 3.4-4.8 4.8s1.4 3.4 4.8 4.8" />
   </svg>
 )
 

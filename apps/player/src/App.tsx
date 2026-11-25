@@ -3,10 +3,10 @@ import { useState } from 'react'
 import type { CenterSummary } from './api/types'
 import { TAB_ORDER, TabBar, type Tab } from './components/TabBar'
 import { spring } from './lib/motion'
-import { BookingsScreen } from './screens/BookingsScreen'
 import { CenterScreen } from './screens/CenterScreen'
 import { CentersScreen } from './screens/CentersScreen'
 import { FriendsScreen } from './screens/FriendsScreen'
+import { GamesScreen } from './screens/GamesScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { ReserveScreen } from './screens/ReserveScreen'
 
@@ -46,17 +46,17 @@ export function App() {
             transition={spring}
             className="absolute inset-0"
           >
-            {tab === 'reserve' && <ReserveScreen onShowBookings={() => selectTab('bookings')} />}
+            {tab === 'reserve' && <ReserveScreen onShowGames={() => selectTab('games')} />}
             {tab === 'centers' && (
               <CentresStack
                 openCenter={openCenter}
                 onOpen={setOpenCenter}
                 onBack={() => setOpenCenter(null)}
-                onShowBookings={() => selectTab('bookings')}
+                onShowGames={() => selectTab('games')}
               />
             )}
-            {tab === 'bookings' && (
-              <BookingsScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('reserve')} />
+            {tab === 'games' && (
+              <GamesScreen onLogIn={() => selectTab('profile')} onFindCourt={() => selectTab('reserve')} />
             )}
             {tab === 'friends' && <FriendsScreen onLogIn={() => selectTab('profile')} />}
             {tab === 'profile' && <ProfileScreen />}
@@ -72,10 +72,10 @@ type CentresStackProps = {
   openCenter: CenterSummary | null
   onOpen: (center: CenterSummary) => void
   onBack: () => void
-  onShowBookings: () => void
+  onShowGames: () => void
 }
 
-function CentresStack({ openCenter, onOpen, onBack, onShowBookings }: CentresStackProps) {
+function CentresStack({ openCenter, onOpen, onBack, onShowGames }: CentresStackProps) {
   const direction = openCenter ? 1 : -1
   return (
     <AnimatePresence mode="popLayout" initial={false} custom={direction}>
@@ -90,7 +90,7 @@ function CentresStack({ openCenter, onOpen, onBack, onShowBookings }: CentresSta
         className="absolute inset-0"
       >
         {openCenter ? (
-          <CenterScreen center={openCenter} onBack={onBack} onShowBookings={onShowBookings} />
+          <CenterScreen center={openCenter} onBack={onBack} onShowGames={onShowGames} />
         ) : (
           <CentersScreen onOpenCenter={onOpen} />
         )}

@@ -18,10 +18,10 @@ const BOOKABLE_DAYS = 14
 type CenterScreenProps = {
   center: CenterSummary
   onBack: () => void
-  onShowBookings: () => void
+  onShowGames: () => void
 }
 
-export function CenterScreen({ center, onBack, onShowBookings }: CenterScreenProps) {
+export function CenterScreen({ center, onBack, onShowGames }: CenterScreenProps) {
   const [dates] = useState(() => upcomingDates(BOOKABLE_DAYS))
   const [selectedDate, setSelectedDate] = useState(todayIsoDate)
   const details = useRemote((signal) => getCenter(center.id, signal), [center.id])
@@ -97,7 +97,7 @@ export function CenterScreen({ center, onBack, onShowBookings }: CenterScreenPro
         onClose={() => setPick(null)}
         onAvailabilityChanged={availability.reload}
         onRefused={showRefusal}
-        onShowBookings={onShowBookings}
+        onShowGames={onShowGames}
       />
     </div>
   )
